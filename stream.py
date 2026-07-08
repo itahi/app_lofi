@@ -4,6 +4,7 @@ import sys
 
 STREAM_KEY = os.getenv("YOUTUBE_KEY")
 VIDEO_FILE = "lo-fi.mp4"
+IMAGE_FILE = "lofo.png"
 
 def start_stream():
     if not STREAM_KEY:
@@ -14,14 +15,24 @@ def start_stream():
         print(f"❌ ERRO: {VIDEO_FILE} não encontrado!")
         sys.exit(1)
     
+    if not os.path.exists(IMAGE_FILE):
+        print(f"❌ ERRO: {IMAGE_FILE} não encontrado!")
+        sys.exit(1)
+    
+    print("✅ Arquivos verificados!")
+    print(f"📹 Vídeo: {VIDEO_FILE} (em loop)")
+    print(f"🖼️ Imagem: {IMAGE_FILE}")
     print("🎬 Iniciando transmissão...")
     
-    # Comando SIMPLES - apenas vídeo
+    # Comando com LOOP + OVERLAY
     cmd = [
         "ffmpeg",
         "-re",
+        "-stream_loop", "-1",        # 🔁 LOOP INFINITO
         "-i", VIDEO_FILE,
-        "-stream_loop", "-1",
+        "-i", IMAGE_FILE,
+        "-filter_complex",
+        "[1:v]scale=200:200[img];[0:v][img]overlay=W-w-20:H-h-20",
         "-c:v", "libx264",
         "-preset", "veryfast",
         "-b:v", "2500k",
